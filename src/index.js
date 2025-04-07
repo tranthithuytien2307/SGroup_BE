@@ -1,13 +1,17 @@
-import express from 'express';  
-import routers from './apis/index.js';
+import express from 'express';
 
-const app = express();  
-const port = 3000;  
+import router from './routes/app.js';
+import errorHandler from './middleware/errorHandler.middleware.js';
 
-app.use(express.json());  
-app.use(express.urlencoded());
-app.use('/',routers);
+const app = express();
+const port = 3000;
 
-app.listen(port, () => {  
-    console.log(`Example app listening on port ${port}`);  
-});  
+app.use(express.json());
+
+app.use('/', router);
+
+app.use(errorHandler);
+
+app.listen(port, () => {
+    console.log(`Example app listening on port http://localhost:${port}`);
+});
