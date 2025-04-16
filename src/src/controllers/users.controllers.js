@@ -1,70 +1,106 @@
 import UserService from '../services/users.service.js';
 
 class UserController {
-  getAll(req, res) {
-    try {
-      const mockUser = UserService.getAllUsers();
-      res.status(200).json(mockUser);
-    } catch (error) {
-      res.status(500).json({ message: 'Internal server error' });
-    }
-  }
+    async createUser(req, res, next) {
+        try {
+            const { name } = req.body;
+            if (!name || typeof name !== 'string' || name.trim() === '') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid name'
+                });
+            }
 
-  getDetail(req, res) {
-    try {
-      const { id } = req.params;
-      const user = UserService.getDetail(id);
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      res.status(200).json(user);
-    } catch (error) {
-      res.status(500).json({ message: 'Internal server error' });
+            const userId = await UserService.createUser(name);
+            res.status(200).json({
+                success: true,
+                data: userId
+            });
+        } catch (err) {
+            next(err);
+        }
     }
-  }
 
-  postUser(req, res) {
-    try {
-      const { name } = req.body;
-      if (!name) {
-        return res.status(400).json({ message: 'Name is required' });
-      }
-      const newUser = UserService.postUser(name);
-      res.status(201).json(newUser);
-    } catch (error) {
-      res.status(500).json({ message: 'Internal server error' });
+    async getAllUsers(req, res, next) {
+        try {
+            const users = await UserService.getAllUsers();
+            res.status(200).json({
+                success: true,
+                data: users
+            });
+        } catch (err) {
+            next(err);
+        }
     }
-  }
 
-  putUser(req, res) {
-    try {
-      const { id } = req.params;
-      const { name } = req.body;
-      if (!name) {
-        return res.status(400).json({ message: 'Name is required' });
-      }
-      const updatedUser = UserService.putUser(id, name);
-      if (!updatedUser) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      res.status(200).json(updatedUser);
-    } catch (error) {
-      res.status(500).json({ message: 'Internal server error' });
-    }
-  }
+    async getDetail(req, res, next) {
+        try {
+            const { id } = req.params;
+            if (isNaN(id) || Number(id) <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid ID'
+                });
+            }
 
-  deleteUser(req, res) {
-    try {
-      const { id } = req.params;
-      const deletedUser = UserService.deleteUser(id);
-      if (!deletedUser) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      res.status(200).json(deletedUser);
-    } catch (error) {
-      res.status(500).json({ message: 'Internal server error' });
+            const user = await UserService.getDetail(id);
+            res.status(200).json({
+                success: true,
+                data: user
+            });
+        } catch (err) {
+            next(err);
+        }
     }
-  }
+
+    async putUser(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { name } = req.body;
+
+            if (!name || typeof name !== 'string' || name.trim() === '') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid name'
+                });
+            }
+
+            if (isNaN(id) || Number(id) <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid ID'
+                });
+            }
+
+            const updatedUser = await UserService.putUser(name, id);
+            res.status(200).json({
+                success: true,
+                data: updatedUser
+            });
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    async deleteUser(req, res, next) {
+        try {
+            const { id } = req.params;
+            if (isNaN(id) || Number(id) <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid ID'
+                });
+            }
+
+            const deletedUser = await UserService.deleteUser(id);
+            res.status(200).json({
+                success: true,
+                data: deletedUser
+            });
+        } catch (err) {
+            next(err);
+        }
+    }
 }
 
 export default new UserController();

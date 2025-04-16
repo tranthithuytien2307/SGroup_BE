@@ -1,41 +1,86 @@
-import Database from '../database/users.database.js';
+import { ReturnDocument } from "mongodb";
+import { getDB } from "../config/db.config.js";
 
 class UserService {
-  getAllUsers() {
-    return Database.getUsers();
-  }
+    validateName(name) {
+        if (!name || typeof name !== 'string' || name.trim() === '') {
+            throw new Error('Invalid name');
+        }
+    }
 
-  getDetail(id) {
-    const mockUser = Database.getUsers();
-    return mockUser.find((u) => u.id === Number(id));
-  }
+    validateId(id) {
+        if (isNaN(id) || Number(id) <= 0) {
+            throw new Error('Invalid ID');
+        }
+    }
 
-  postUser(name) {
-    const mockUser = Database.getUsers();
-    const id = mockUser.length > 0 ? mockUser[mockUser.length - 1].id + 1 : 1;
-    const newUser = { id, name };
-    mockUser.push(newUser);
-    Database.setUsers(mockUser);
-    return newUser;
-  }
+    async createUser(name) {
+        try {
+            this.validateName(name);
 
-  putUser(userId, name) {
-    const mockUser = Database.getUsers();
-    const user = mockUser.find((u) => u.id === Number(userId));
-    if (!user) return null;
-    user.name = name;
-    Database.setUsers(mockUser);
-    return user;
-  }
+            const count = await getDB().collection('user').countDocuments();
+            const user = await getDB().collection('user').insertOne({
+                name: name.trim(),
+                id: count + 1
+            });
+            return user.insertedId;
+        } catch (err) {
+            throw err;
+        }
+    }
 
-  deleteUser(idUser) {
-    const mockUser = Database.getUsers();
-    const userIndex = mockUser.findIndex((u) => u.id === Number(idUser));
-    if (userIndex === -1) return null;
-    const deletedUser = mockUser.splice(userIndex, 1)[0];
-    Database.setUsers(mockUser);
-    return deletedUser;
-  }
+    async getAllUsers() {
+        try {
+            const users = await getDB().collection('user').find().toArray();
+            return users;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async getDetail(id) {
+        try {
+            this.validateId(id);
+
+            const user = await getDB().collection('user').findOne({ id: Number(id) });
+            return user;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async putUser(name, id) {
+        try {
+            this.validateName(name);
+            this.validateId(id);
+
+            const user = await getDB().collection('user').findOneAndUpdate(
+                { id: Number(id) },
+                { $set: { name: name.trim() } },
+                { returnDocument: ReturnDocument.AFTER }
+            );
+            if (!user.value) {
+                throw new Error('User not found');
+            }
+            return user.value;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async deleteUser(id) {
+        try {
+            this.validateId(id);
+
+            const user = await getDB().collection('user').findOneAndDelete({ id: Number(id) });
+            if (!user.value) {
+                throw new Error('User not found');
+            }
+            return user.value;
+        } catch (err) {
+            throw err;
+        }
+    }
 }
 
 export default new UserService();
