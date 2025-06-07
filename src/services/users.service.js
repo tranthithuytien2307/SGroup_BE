@@ -4,15 +4,34 @@ import hashProvides from "../providers/hash.provides.js";
 import emailProvider from "../providers/email.provides.js";
 import bcrypt from "bcryptjs";
 class UserService {
-    async Register(name, password, email) {
+    async createUser(name, password, email,role ='user'){
+        try{
+            const { hashString } = await hashProvides.generateHash(password);
+            const user = await usersModule.createUser(name, hashString, email, role);
+            return user;
+        } catch(err){
+            throw err;
+        }
+    }
+
+    async getAllUsers(){
+        try{
+            return await usersModule.getAllUsers();
+        } catch(err){
+            throw err;
+        }
+    }
+
+    async Register(name, password, email, role = 'user') {
         try {
             const { hashString } = await hashProvides.generateHash(password);
-            const user = await usersModule.Register(name, hashString, email);
+            const user = await usersModule.Register(name, hashString, email, role); // 👈 truyền role
             return user;
         } catch (err) {
             throw err;
         }
     }
+
     async LoginUser(email, password){
         try{
             const user = await usersModule.getUserByEmail(email);
@@ -41,7 +60,8 @@ class UserService {
         const result = {
             username: user.name,
             id: user._id,
-            email: user.email
+            email: user.email,
+            role: user.role
         }
         return result;
     }
@@ -91,49 +111,53 @@ class UserService {
             throw err;
         }
     }
-    // async Login(email, password){
-    //     try{
-    //         const user = await usersModule.getUser(email, password);
-    //         if (!user){
-    //             throw new Error('User not found');
-    //         }
-    //         const token = await userProvides.encodeToken(user);
-    //         return token;
-    //     } catch(err){
-    //         throw err;
-    //     }
-    // }
-    // async getDetail(id) {
-    //     try {
-    //         return await usersModule.getDetail(id);
-    //     } catch (err) {
-    //         throw err;
-    //     }
-    // }
+    async Login(email, password){
+        try{
+            const user = await usersModule.getUser(email, password);
+            if (!user){
+                throw new Error('User not found');
+            }
+            const token = await userProvides.encodeToken(user);
+            return token;
+        } catch(err){
+            throw err;
+        }
+    }
+    async getDetail(id) {
+        try {
+            return await usersModule.getDetail(id);
+        } catch (err) {
+            throw err;
+        }
+    }
 
-    // async putUser(name, id) {
-    //     try {
-    //         const user = await usersModule.putUser(name, id);
-    //         if (!user) {
-    //             throw new Error('User not found');
-    //         }
-    //         return user;
-    //     } catch (err) {
-    //         throw err;
-    //     }
-    // }
+    async putUser(name, id) {
+        try {
+            console.log("ten", name);
+            console.log("id", id);
+            const user = await usersModule.putUser(name, id);
+            if (!user) {
+                console.error("Không tìm thấy user với ID:", id);
+                throw new Error('User not found');
+            }
+            return user;
+        } catch (err) {
+            throw err;
+        }
+    }
 
-    // async deleteUser(id) {
-    //     try {
-    //         const user = await usersModule.deleteUser(id);
-    //         if (!user.value) {
-    //             throw new Error('User not found');
-    //         }
-    //         return user.value;
-    //     } catch (err) {
-    //         throw err;
-    //     }
-    // }
+
+    async deleteUser(id) {
+        try {
+            const user = await usersModule.deleteUser(id);
+            if (!user.value) {
+                throw new Error('User not found');
+            }
+            return user.value;
+        } catch (err) {
+            throw err;
+        }
+    }
 }
 
 export default new UserService();

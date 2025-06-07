@@ -1,10 +1,14 @@
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 
-class AuthProvider{
-    async encodeToken(user){
+class AuthProvider {
+    async encodeToken(user) {
         const token = jwt.sign(
-            {id: user._id},
+            {
+                id: user._id,
+                role: user.role,       
+                email: user.email     
+            },
             process.env.JWT_SECRET,
             {
                 expiresIn: process.env.JWT_EXPIRES_IN,
@@ -13,8 +17,10 @@ class AuthProvider{
         );
         return token;
     }
-    async decodeToken(token){
-        return jwt.verify(token, process.env.JWT_SECRET)
+
+    async decodeToken(token) {
+        return jwt.verify(token, process.env.JWT_SECRET);
     }
 }
+
 export default new AuthProvider();
