@@ -38,8 +38,8 @@ jobs:
       - name: Deploy docker image to EC2
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: learn-devops
-          IMAGE_TAG: ${{ github.sha }}
+          REPOSITORY: SGroup_BE
+          IMAGE_TAG: latest
           AWS_DEFAULT_REGION: ap-south-1
           PORT: ${{ env.PORT }}
           DATABASE_URL: ${{ env.DATABASE_URL }}
