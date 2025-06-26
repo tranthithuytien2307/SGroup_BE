@@ -1,0 +1,23 @@
+services:
+    app:
+        build: .
+        container_name: be_app
+        ports:
+            - '3001:3000'
+        volumes:
+            - .:/app
+        depends_on:
+            - mongo
+        environment:
+            - MONGO_URI=mongodb://mongo:27017/sgroup_be
+
+    mongo:
+        image: mongo:6
+        container_name: be_mongo
+        ports:
+            - '28000:27017'
+        volumes:
+            - mongo-data:/data/db
+
+volumes:
+    mongo-data:
