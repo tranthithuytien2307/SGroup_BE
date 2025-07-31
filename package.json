@@ -2,7 +2,7 @@
   "name": "be_buoi1",
   "version": "1.0.0",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "build": "babel ./src --out-dir ./build",
     "start": "nodemon --exec babel-node src/index.js",
@@ -28,6 +28,10 @@
     "prettier": "^3.5.3"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "dotenv": "^16.5.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "joi": "^17.13.3",
+    "mongodb": "^6.15.0"
   }
 }
